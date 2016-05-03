@@ -10,7 +10,7 @@ class Client():
 
 	def listener(q, trigger, p, module):
 		while True:
-			temp = q.get()
+			temp = q.get();
 			if temp == [module.provides, trigger]:
 				p.put([module.provides, module.trigger_called(trigger)]);
 			elif temp[0] == module:
