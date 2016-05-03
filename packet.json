@@ -1,10 +1,9 @@
 {
 	"module": "temp",
 	"version": "0.0.1",
+	"method": "update_temp",
 
 	"payload": {
-		"method": "update_temp",
-		
 		"args": {
 			"temp": "120.2 F" 
 		}

@@ -20,7 +20,7 @@ class Client():
 		while True:
 			self.server_send(*p.get());
 
-	def register(self, module, trigger, trigger_done=False):
+	def register(self, module, trigger, trigger_done = False):
 		if not trigger_done:
 			trigger_done = module.trigger_called
 		q = queue.Queue()
@@ -46,5 +46,9 @@ class Client():
 		while True:
 			time.sleep(10);
 
-	def server_send(self, data): 
+
+	def prepare_packet(self):
+		pass
+
+	def server_send(self, module, data): 
 		pass
