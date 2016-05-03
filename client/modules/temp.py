@@ -1,6 +1,7 @@
 import random, sys;
 
 from .module import Module;
+from enum import Enum
 
 class module(Module):
 	
