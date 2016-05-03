@@ -18,7 +18,7 @@ class Client():
 
 	def global_queue_listener_function(self, p):
 		while True:
-			self.server_send(p.get());
+			self.server_send(*p.get());
 
 	def register(self, module, trigger, trigger_done=False):
 		if not trigger_done:
