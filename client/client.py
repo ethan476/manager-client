@@ -23,8 +23,11 @@ class Client():
 
 	def __init__(self):
 		logging.info('Started Client();');
-
+		sys.path.append("modules")
+		modules = map(__import__, [f[8:] for f in glob.glob("modules/*")])
 		global_queue_listener = threading.Thread(target=global_queue_listener_function, args=(global_event_queue,))
 		global_queue_listener.start()
+		for module in modules:
+			register(module, 0) # 0 will be replaced with some enum like triggers.STARTUP
 		while True:
 			time.sleep(10);
