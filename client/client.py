@@ -1,6 +1,6 @@
 import logging, time, sys, glob;
 
-from triggers inmport Triggers;
+from triggers import Triggers;
 
 class Client():
 
@@ -31,14 +31,13 @@ class Client():
 		logging.info('Started Client();');
 
 		sys.path.append("modules");
-		modules = map(__import__, [f[8:] for f in glob.glob("modules/*")]);
-
+		modules = [g.module(register, Triggers) for g in map(__import__, [f[len("modules") + 1:] for f in glob.glob("modules/*")])]
 		global_queue_listener = threading.Thread(target = global_queue_listener_function, args = (global_event_queue,))
 		global_queue_listener.start()
-		
 		for module in modules:
-			register(module, Triggers.STARTUP);
-
-			
+			event(module, Triggers.STARTUP)
+			for thread in module.listeners:
+				h = threading.Thread(target = thread, args = (event,))
+				h.start()
 		while True:
 			time.sleep(10);
