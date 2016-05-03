@@ -55,8 +55,6 @@ def restart(args):
 def status(args):
 	daemon = Daemon(None, root + '/manager-client.pid');
 
-	print(daemon.running());
-
 	if daemon.running():
 		print('Service is running.');
 	else:
