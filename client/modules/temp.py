@@ -1,9 +1,17 @@
-provides = "temp"
-import random, sys
-def get_value(server_request=None):
-    return random.randrange(30,40)
-def trigger_called(trigger):
-    return get_value()
-if __name__ == "main":
-    print("Fuck off")
-    sys.exit(1)
+import random, sys;
+
+from .module import Module;
+
+class Temp(Module):
+	
+	self.provides = "temp";
+
+	def __init__(self):
+		pass
+
+	def get_value(self, server_request = None):
+		return random.randrange(30, 40);
+
+	def trigger_called(self, trigger):
+		return get_value();
+
