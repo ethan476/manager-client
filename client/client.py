@@ -12,9 +12,9 @@ class Client():
 		while True:
 			temp = q.get();
 			if temp == [module.provides, trigger]:
-				p.put([module, trigger_done(trigger)]);
+				p.put([module, True, trigger_done(trigger)]);
 			elif temp[0] == module:
-				p.put([module, module.get_value(temp[1])]);
+				p.put([module, False, module.get_value(temp[1])]);
 
 	def global_queue_listener_function(self, p):
 		while True:
@@ -50,5 +50,5 @@ class Client():
 	def prepare_packet(self):
 		pass
 
-	def server_send(self, module, data): 
+	def server_send(self, module, was_trigger, data): 
 		pass
