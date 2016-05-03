@@ -1,0 +1,12 @@
+{
+	"module": "temp",
+	"version": "0.0.1",
+
+	"method": "update_temp",
+	"args": {
+		"temp": "120.2 F" 
+	},
+
+	"auth_token": "8NnbcgHnkKAwvZ37xpcI7RTuj1ZrlbZZe2A9mQ5YvWGnt4rFQtMcEaPWYAf6t7l2",
+	"timestamp": 1462311133
+}
