@@ -14,21 +14,22 @@ class module(Module):
 			time.sleep(10);
 			event(self, 11);
 
+	def trigger_10_called(self):
+		return 99
+	def trigger_11_called(self):
+		return 120
+
 	self.provides = "temp";
 
 	self.listeners = [trigger_sleep_8, trigger_sleep_10];
 
 	def __init__(self, register, triggers):
-		register(self, 10)
-		register(self, 11)
+		register(self, 10, trigger_10_called)
+		register(self, 11, trigger_11_called)
 		register(self, triggers.STARTUP)
 
 	def get_value(self, server_request = None):
 		return random.randrange(30, 40);
 
 	def trigger_called(self, trigger):
-		if trigger == 10:
-			return 99
-		else:
-			return get_value();
-
+		return get_value();

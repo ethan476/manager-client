@@ -8,11 +8,11 @@ class Client():
 		for q in listener_queues:
 			q.put([module.provides, server_request]);
 
-	def listener(q, trigger, p, module):
+	def listener(q, trigger, p, module, trigger_done):
 		while True:
 			temp = q.get();
 			if temp == [module.provides, trigger]:
-				p.put([module.provides, module.trigger_called(trigger)]);
+				p.put([module.provides, trigger_done(trigger)]);
 			elif temp[0] == module:
 				p.put([module.provides, module.get_value(temp[1])]);
 
@@ -20,9 +20,11 @@ class Client():
 		while True:
 			server_send(p.get());
 
-	def register(module, trigger):
+	def register(module, trigger, trigger_done=False):
+		if not trigger_done:
+			trigger_done = module.trigger_called
 		q = queue.Queue()
-		h = threading.Thread(target = listener, args = (q, trigger, global_event_queue, module));
+		h = threading.Thread(target = listener, args = (q, trigger, global_event_queue, module, trigger_done));
 		h.start();
 		listeners.append(h);
 		listener_queues.append(q);
