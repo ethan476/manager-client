@@ -1,3 +1,0 @@
-[console_scripts]
-manager-client = client:main
-
