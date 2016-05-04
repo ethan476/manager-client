@@ -42,6 +42,7 @@ class Client():
 		self.listeners = []
 		self.listener_queues = []
 		sys.path.append("client/modules");
+
 		modules = [g.module(self.register, Triggers) for g in map(__import__, [f[len("client/modules") + 1:] for f in glob.glob("client/modules/*")])]
 		global_queue_listener = threading.Thread(target = self.global_queue_listener_function, args = (self.global_event_queue,))
 		global_queue_listener.start()
