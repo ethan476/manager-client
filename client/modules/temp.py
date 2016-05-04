@@ -1,4 +1,4 @@
-import random, sys, time
+import random, sys, time, subprocess
 
 from enum import Enum
 
@@ -14,7 +14,7 @@ class module():
 	def overheat_checker(self, event):
 		while True:
 			time.sleep(8);
-			if self.get_temp() > 50:
+			if max(self.get_temp()) > 70:
 				event(self, custom_triggers.OVERHEAT);
 
 	listeners = [overheat_checker];
@@ -26,8 +26,15 @@ class module():
 		register(self, custom_triggers.OVERHEAT, self.trigger_10_called);
 		register(self, triggers.STARTUP);
 
-	def get_temp():
-		return random.randrange(30, 40);
+	def get_temp(self):
+		lines = subprocess.check_output(["sensors"]).decode("utf-8").split("\n")
+		result = []
+		for line in lines:
+			for word in line.split(" "):
+				if '°' in word:
+					result.append(float(word[:-2]))
+					break # only get the first one from each line
+		return result
 
 	def server_request(self, server_request = None):
 		return self.get_temp();

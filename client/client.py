@@ -82,6 +82,7 @@ class Client():
 			time.sleep(10);
 
 	def server_send(self, module, was_trigger, data): 
+		print(data, file=sys.stderr)
 		return
 		from_string = "request"
 		if was_triggered:
