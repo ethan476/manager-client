@@ -1,0 +1,13 @@
+{
+	"message_type": 4, // check message_type.py enum
+
+	"module": "temp",
+	"version": "0.0.1",
+	"from": "a_trigger", // trigger
+
+	// Module specific
+	"payload": [54.2, 31.5, 86.7],
+
+	"auth_token": "8NnbcgHnkKAwvZ37xpcI7RTuj1ZrlbZZe2A9mQ5YvWGnt4rFQtMcEaPWYAf6t7l2",
+	"timestamp": 1462311133
+}
