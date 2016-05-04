@@ -58,3 +58,4 @@ class Client():
 
 	def server_send(self, module, was_trigger, data): 
 		pass
+		# event(String module_name, Object what the server sent, False)
