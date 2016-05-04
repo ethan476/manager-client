@@ -14,7 +14,7 @@ class module():
 	def overheat_checker(self, event):
 		while True:
 			time.sleep(8);
-			if self.get_value() > 50:
+			if self.get_temp() > 50:
 				event(self, custom_triggers.OVERHEAT);
 
 	listeners = [overheat_checker];
@@ -26,8 +26,11 @@ class module():
 		register(self, custom_triggers.OVERHEAT, self.trigger_10_called);
 		register(self, triggers.STARTUP);
 
-	def server_request(self, server_request = None):
+	def get_temp():
 		return random.randrange(30, 40);
 
+	def server_request(self, server_request = None):
+		return self.get_temp();
+
 	def trigger_called(self, trigger):
-		return self.get_value();
+		return self.get_temp();
