@@ -27,6 +27,7 @@ class module():
 		register(self, triggers.STARTUP);
 
 	def get_value(self, server_request = None):
+		print(server_request, file = sys.stderr);
 		return random.randrange(30, 40);
 
 	def trigger_called(self, trigger):
