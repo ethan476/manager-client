@@ -16,7 +16,7 @@ class Client():
 			if server_request and temp[0] == module.provides and not temp[2]:
 				p.put([module, False, module.server_request(temp[1])]);
 			elif temp == [module.provides, trigger, True]:
-				p.put([module, True, trigger_done(trigger)]);
+				p.put([module, trigger, trigger_done(trigger)]);
 
 	def global_queue_listener_function(self, p):
 		while True:
@@ -83,9 +83,13 @@ class Client():
 
 	def server_send(self, module, was_trigger, data): 
 		return
+		from_string = "request"
+		if was_triggered:
+			from_string = str(was_trigger)
 		self.socket.write(json.dumps({
 			"module": module.provides,
 			"version": module.version,
+			"from": from_string,
 			"payload": data,
 			"auth_token": "",
 			"timestamp": int(time.time())
