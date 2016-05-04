@@ -1,7 +1,6 @@
 {
 	"module": "temp",
 	"version": "0.0.1",
-	"method": "update_temp",
 
 	"payload": {
 		"args": {

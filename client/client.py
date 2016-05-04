@@ -35,7 +35,7 @@ class Client():
 		
 		h.start();
 
-		logging.info('Started thread with PID: %s', h.get_ident());
+		#logging.info('Started thread with PID: %s', h.get_ident());
 
 
 	def __init__(self):
@@ -46,6 +46,7 @@ class Client():
 		self.listener_queues = []
 		
 		sys.path.append("client/modules");
+		self.socket = None;
 
 
 		old_files = [f[len("client/modules") + 1:] for f in glob.glob("client/modules/*")];
@@ -81,8 +82,14 @@ class Client():
 			time.sleep(10);
 
 
-	def prepare_packet(self):
-		pass
+	def prepare_packet(self, data):
+		return data
 
 	def server_send(self, module, was_trigger, data): 
-		print(module, was_trigger, data)
+		self.socket.write(json.dumps({
+			"module": module.provides,
+			"version": module.version,
+			"payload": prepare_packet(data),
+			"auth_token": "",
+			"timestamp": subprocess.check_output(["date", '+%s']).decode("utf-8").strip()
+		}))
