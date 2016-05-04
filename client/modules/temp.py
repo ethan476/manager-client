@@ -7,11 +7,11 @@ class custom_triggers(Enum):
 
 class module():
 
-	self.provides = "temp";
+	provides = "temp";
 
-	self.version = "0.0.1";
+	version = "0.0.1";
 
-	self.listeners = [overheat_checker];
+	listeners = [overheat_checker];
 	
 	def overheat_checker(self, event):
 		while True:
