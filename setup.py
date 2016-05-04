@@ -9,7 +9,7 @@ from setuptools import setup, find_packages, Command
 
 base = path.abspath(path.dirname(__file__));
 
-with open(path.join(base, 'README'), encoding='utf-8') as f:
+with open(path.join(base, 'README.md'), encoding='utf-8') as f:
 	long_description = f.read();
 
 
