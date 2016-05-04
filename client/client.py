@@ -1,11 +1,11 @@
-import logging, time, sys, glob, threading, queue;
+import logging, time, sys, glob, threading, queue, os
 
 from .triggers import Triggers;
 
 class Client():
 
 	def event(self, module, server_request, trigger = True):
-		for q in listener_queues:
+		for q in self.listener_queues:
 			q.put([module.provides, server_request, trigger]);
 
 	def listener(self, q, trigger, p, module, trigger_done):
@@ -17,7 +17,6 @@ class Client():
 		while True:
 			temp = q.get();
 			if temp[0] == module.provides and not temp[2]:
-				print("Sending server event " + temp[1] + " to module " + module.provides)
 				p.put([module, False, module.get_value(temp[1])])
 	def global_queue_listener_function(self, p):
 		while True:
@@ -31,18 +30,19 @@ class Client():
 			h = threading.Thread(target = self.server_request_listener, args = (q, global_event_queue, module));
 		else:
 			h = threading.Thread(target = self.listener, args = (q, trigger, global_event_queue, module, trigger_done));
+		h.daemon = true;
+		self.listeners.append(h);
+		self.listener_queues.append(q);
 		h.start();
-		listeners.append(h);
-		listener_queues.append(q);
 
 	def __init__(self):
 		logging.info('Started Client();');
 
 		self.global_event_queue = queue.Queue();
-		listeners = []
-		listener_queues = []
-		sys.path.append("modules");
-		modules = [g.module(self.register, Triggers) for g in map(__import__, [f[len("modules") + 1:] for f in glob.glob("modules/*")])]
+		self.listeners = []
+		self.listener_queues = []
+		sys.path.append("client/modules");
+		modules = [g.module(self.register, Triggers) for g in map(__import__, [f[len("client/modules") + 1:] for f in glob.glob("modules/*")])]
 		global_queue_listener = threading.Thread(target = self.global_queue_listener_function, args = (self.global_event_queue,))
 		global_queue_listener.start()
 		for module in modules:
@@ -53,9 +53,8 @@ class Client():
 				h.start()
 
 
-		time.sleep(10);
+		time.sleep(1);
 		self.event("temp", 'This is a test', False);
-
 
 		while True:
 			time.sleep(10);

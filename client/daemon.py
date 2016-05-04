@@ -20,7 +20,7 @@ class Daemon():
 			logging.error("fork #1 failed: %d (%s)\n" % (e.errno, e.strerror));
 			sys.exit(1);
 
-		os.chdir("/");
+		#os.chdir("/");
 		os.setsid();
 		os.umask(0);
 
