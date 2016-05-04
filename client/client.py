@@ -10,9 +10,6 @@ class Client():
 		for q in self.listener_queues:
 			q.put([module, server_request, trigger]);
 
-	def event_wrapper(self, module, trigger):
-		event(module, trigger) # do NOT permit the module's listeners to fire off server events.
-
 	def listener(self, q, trigger, p, module, trigger_done, server_request):
 		while True:
 			temp = q.get();
@@ -74,7 +71,7 @@ class Client():
 			self.register(module, False, False, True);
 
 			for thread in module.listeners:
-				h = threading.Thread(target = thread, args = (module, self.event_wrapper,));
+				h = threading.Thread(target = thread, args = (module, lambda x, y: self.event(x,y,True),));
 				h.start();
 
 		time.sleep(1);
