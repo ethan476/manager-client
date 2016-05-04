@@ -1,4 +1,4 @@
-import logging, time, sys, glob, threading, queue, os
+import logging, time, sys, glob, threading, queue, os, time
 
 from .triggers import Triggers;
 
@@ -81,15 +81,12 @@ class Client():
 		while True:
 			time.sleep(10);
 
-
-	def prepare_packet(self, data):
-		return data
-
 	def server_send(self, module, was_trigger, data): 
-		self.socket.write(json.dumps({
+		pass
+		'''self.socket.write(json.dumps({
 			"module": module.provides,
 			"version": module.version,
-			"payload": prepare_packet(data),
+			"payload": data,
 			"auth_token": "",
-			"timestamp": subprocess.check_output(["date", '+%s']).decode("utf-8").strip()
-		}))
+			"timestamp": int(time.time())
+		}));'''
