@@ -26,8 +26,7 @@ class module():
 		register(self, custom_triggers.OVERHEAT, self.trigger_10_called);
 		register(self, triggers.STARTUP);
 
-	def get_value(self, server_request = None):
-		print(server_request, file = sys.stderr);
+	def server_request(self, server_request = None):
 		return random.randrange(30, 40);
 
 	def trigger_called(self, trigger):

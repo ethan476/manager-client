@@ -13,14 +13,11 @@ class Client():
 			temp = q.get();
 			if temp == [module.provides, trigger, True]:
 				p.put([module, True, trigger_done(trigger)]);
-				
 	def server_request_listener(self, q, p, module):
 		while True:
 			temp = q.get();
 			if temp[0] == module.provides and not temp[2]:
-				p.put([module, False, module.server_request(temp[1])]);
-
-
+				p.put([module, False, module.get_value(temp[1])])
 	def global_queue_listener_function(self, p):
 		while True:
 			self.server_send(*p.get());
