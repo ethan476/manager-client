@@ -38,7 +38,8 @@ class Client():
 		logging.info('Started Client();');
 
 		self.global_event_queue = queue.Queue();
-
+		listeners = []
+		listener_queues = []
 		sys.path.append("modules");
 		modules = [g.module(self.register, Triggers) for g in map(__import__, [f[len("modules") + 1:] for f in glob.glob("modules/*")])]
 		global_queue_listener = threading.Thread(target = self.global_queue_listener_function, args = (self.global_event_queue,))
@@ -63,5 +64,4 @@ class Client():
 		pass
 
 	def server_send(self, module, was_trigger, data): 
-		pass
-		# event(String module_name, Object what the server sent, False)
+		print(modules, was_trigger, data)
