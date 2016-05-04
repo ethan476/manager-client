@@ -1,4 +1,4 @@
-import logging, time, sys, glob, threading, queue, os, time
+import logging, time, sys, glob, threading, queue, os, time, base64
 
 from .triggers import Triggers;
 
@@ -21,6 +21,17 @@ class Client():
 	def global_queue_listener_function(self, p):
 		while True:
 			self.server_send(*p.get());
+
+	def pinger_thread(self):
+		while True:
+			time.sleep(10) # CHANGEME
+			payload = base64.b64encode(os.urandom(12)).decode("utf-8")
+			self.socket.write({
+				"message_type": 0,
+				"payload": payload,
+				"timestamp": int(time.time())
+				})
+			self.pings_awaiting_response.append(payload)
 
 	def register(self, module, trigger, trigger_method = False, server_request = False):
 		
