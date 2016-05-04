@@ -82,11 +82,11 @@ class Client():
 			time.sleep(10);
 
 	def server_send(self, module, was_trigger, data): 
-		pass
-		'''self.socket.write(json.dumps({
+		return
+		self.socket.write(json.dumps({
 			"module": module.provides,
 			"version": module.version,
 			"payload": data,
 			"auth_token": "",
 			"timestamp": int(time.time())
-		}));'''
+		}));
