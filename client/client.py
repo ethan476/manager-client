@@ -17,6 +17,7 @@ class Client():
 		while True:
 			temp = q.get();
 			if temp[0] == module.provides and not temp[2]:
+				print("Sending server event " + temp[1] + " to module " + module.provides)
 				p.put([module, False, module.get_value(temp[1])])
 	def global_queue_listener_function(self, p):
 		while True:
