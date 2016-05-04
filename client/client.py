@@ -81,16 +81,15 @@ class Client():
 			time.sleep(10);
 
 	def server_send(self, module, was_trigger, data): 
-		print(data, file=sys.stderr)
-		return
-		from_string = "request"
-		if was_triggered:
-			from_string = str(was_trigger)
-		self.socket.write(json.dumps({
+		message_object = {
 			"module": module.provides,
 			"version": module.version,
-			"from": from_string,
+			"mesage_type": 3,
 			"payload": data,
 			"auth_token": "",
 			"timestamp": int(time.time())
-		}));
+		}
+		if was_triggered:
+			message_object["message_type"] = 4
+			message_object["trigger"] = was_trigger
+		self.socket.write(json.dumps(message_object));
