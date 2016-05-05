@@ -1,9 +1,8 @@
-import logging, time, sys, glob, threading, queue, os, time, base64
+import logging, time, sys, glob, threading, queue, os, time, base64, atexit, json
 
 from .triggers import Triggers;
 
 class Client():
-
 	def event(self, module, server_request, trigger = True):
 		logging.info('Listener_queues length: %s', len(self.listener_queues));
 
@@ -80,6 +79,7 @@ class Client():
 
 			self.event(module, Triggers.STARTUP);
 			self.register(module, False, False, True);
+			atexit.register(self.event, module, Triggers.SHUTDOWN)
 
 			for thread in module.listeners:
 				h = threading.Thread(target = thread, args = (module, lambda x, y: self.event(x,y,True),));
@@ -100,7 +100,8 @@ class Client():
 			"auth_token": "",
 			"timestamp": int(time.time())
 		}
-		if was_triggered:
+		if was_trigger:
 			message_object["message_type"] = 4
 			message_object["trigger"] = was_trigger
-		self.socket.write(json.dumps(message_object));
+		#self.socket.write(json.dumps(message_object));
+		print(json.dumps(message_object), file=sys.stderr)

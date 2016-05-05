@@ -3,7 +3,7 @@ import sys, os, time, logging, atexit;
 from signal import SIGTERM;
 
 class Daemon():
-	def __init__(self, runnable, pidfile = '/tmp/pidfile', stdin = '/dev/null', stdout = '/dev/null', stderr = '/tmp/stderr'):
+	def __init__(self, runnable, pidfile = '/tmp/pidfile', stdin = '/dev/null', stdout = '/tmp/stderr', stderr = '/tmp/stderr'):
 		self.stdin = stdin;
 		self.stdout = stdout;
 		self.stderr = stderr;
