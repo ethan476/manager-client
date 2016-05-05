@@ -3,9 +3,19 @@ import logging, time, sys, glob, threading, queue, os, time, base64, atexit, jso
 from .triggers import Triggers;
 
 class Client():
-	def event(self, module, server_request, trigger = True):
-		logging.info('Listener_queues length: %s', len(self.listener_queues));
+	def register(self, module, trigger, trigger_method = False, server_request = False):
+		if not trigger_method:
+			trigger_method = module.trigger_called;
 
+		q = queue.Queue();
+		h = threading.Thread(target = self.listener, args = (q, trigger, self.global_event_queue, module, trigger_method, server_request));
+	
+		self.listeners.append(h);
+		self.listener_queues.append(q);
+		
+		h.start();
+
+	def event(self, module, server_request, trigger = True):
 		for q in self.listener_queues:
 			q.put([module, server_request, trigger]);
 
@@ -32,17 +42,18 @@ class Client():
 				"timestamp": timestamp
 				})
 			self.pings_awaiting_response_queue.put([timestamp, payload])
+
 	def ping_collector_thread(self):
 		pings_awaiting_response = []
 		while True:
+			recieved_ping = False
 			if not self.recieved_pings.empty():
 				recieved_ping = self.recieved_pings.get()
 			if not self.pings_awaiting_response_queue.empty():
 				pings_awaiting_response.append(self.pings_awaiting_response_queue.get())
-			i = 0
-			while i < len(pings_awaiting_response):
-				if pings_awaiting_response[i][1] == recieved_ping:
-					del pings_awaiting_response[i]
+			for ping in pings_awaiting_response
+				if ping[1] == recieved_ping:
+					pings_awaiting_response.remove(ping)
 					break
 			for ping in pings_awaiting_response:
 				if int(time.time() - ping[0]) > self.config["ping_timeout"] * 2:
@@ -50,21 +61,6 @@ class Client():
 					self.establish_socket()
 					pings_awaiting_response = []
 			time.sleep(self.config["ping_timeout"] / 5)
-
-	def register(self, module, trigger, trigger_method = False, server_request = False):
-		
-		if not trigger_method:
-			trigger_method = module.trigger_called;
-
-		q = queue.Queue();
-		h = threading.Thread(target = self.listener, args = (q, trigger, self.global_event_queue, module, trigger_method, server_request));
-	
-		self.listeners.append(h);
-		self.listener_queues.append(q);
-		
-		h.start();
-
-		#logging.info('Started thread with PID: %s', h.get_ident());
 
 	def __init__(self):
 		logging.info('Started Client();');
@@ -89,23 +85,23 @@ class Client():
 				files.append(f[:-3]);
 		
 		modules = [g.module(self.register, Triggers) for g in map(__import__, files)];
-
+		# Start the thread that will redirect the results from querying the modules to the server
 		global_queue_listener = threading.Thread(target = self.global_queue_listener_function, args = (self.global_event_queue,));
 		global_queue_listener.start();
 		
+		if len(modules) == 1:
+			logging.info('Loaded 1 module.', );
+		else:
+			logging.info('Loaded %s modules.', modules);
+
 		for module in modules:
+			self.event(module, Triggers.STARTUP); # Send it the startup event
+			self.register(module, False, False, True); # Sign it up for server requests in the event system
+			atexit.register(self.event, module, Triggers.SHUTDOWN) # Send it the shutdown event on exit
+			# Note that they will only receive the startup and shutdown events if they have specifically requested them in their constructor
 
-			if len(modules) == 1:
-				logging.info('Loaded 1 module.', );
-			else:
-				logging.info('Loaded %s modules.', modules);
-
-			self.event(module, Triggers.STARTUP);
-			self.register(module, False, False, True);
-			atexit.register(self.event, module, Triggers.SHUTDOWN)
-
-			for thread in module.listeners:
-				h = threading.Thread(target = thread, args = (module, lambda x, y: self.event(x,y,True),));
+			for thread in module.listeners: # Also start all of their listeners
+				h = threading.Thread(target = thread, args = (module, lambda x, y: self.event(x,y,True),)); # We used to give the listeners module, thread but then they would be able to send server events
 				h.start();
 
 		time.sleep(1);
