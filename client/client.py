@@ -49,6 +49,7 @@ class Client():
 					# We should log something here
 					self.establish_socket()
 					pings_awaiting_response = []
+			time.sleep(self.config["ping_timeout"] / 5)
 
 	def register(self, module, trigger, trigger_method = False, server_request = False):
 		
@@ -67,19 +68,20 @@ class Client():
 
 	def __init__(self):
 		logging.info('Started Client();');
+		# Open config file
 		self.config = configparser.ConfigParser()
 		self.config.read("/etc/manager-client/config.ini")
 		self.config = self.config["Global"]
+		# Set some instance variables
 		self.global_event_queue = queue.Queue();
 		self.listeners = []
 		self.listener_queues = []
 		self.pings_awaiting_response_queue = queue.Queue()
 		self.recieved_pings = queue.Queue()
-		
+		# Connect to the server
+		self.establish_socket()
+		# Begin loading modules
 		sys.path.append("client/modules");
-		self.socket = None;
-
-
 		old_files = [f[len("client/modules") + 1:] for f in glob.glob("client/modules/*")];
 		files = []
 		for f in old_files:
@@ -128,5 +130,6 @@ class Client():
 		print(json.dumps(message_object), file=sys.stderr)
 	def establish_socket(self):
 		self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		server = port = 0 # TODO
+		server, port = self.config["server"], self.config["port"]
 		self.socket.connect(server, port)
+		# todo - some kind of authentication
