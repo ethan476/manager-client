@@ -1,4 +1,4 @@
-import logging, time, sys, glob, threading, queue, os, time, base64, atexit, json
+import logging, time, sys, glob, threading, queue, os, time, base64, atexit, json, configparser
 
 from .triggers import Triggers;
 
@@ -23,14 +23,32 @@ class Client():
 
 	def pinger_thread(self):
 		while True:
-			time.sleep(10) # CHANGEME
+			time.sleep(self.config["ping_timeout"])
 			payload = base64.b64encode(os.urandom(12)).decode("utf-8")
+			timestamp = int(time.time())
 			self.socket.write({
 				"message_type": 0,
 				"payload": payload,
-				"timestamp": int(time.time())
+				"timestamp": timestamp
 				})
-			self.pings_awaiting_response.append(payload)
+			self.pings_awaiting_response_queue.put([timestamp, payload])
+	def ping_collector_thread(self):
+		pings_awaiting_response = []
+		while True:
+			if not self.recieved_pings.empty():
+				recieved_ping = self.recieved_pings.get()
+			if not self.pings_awaiting_response_queue.empty():
+				pings_awaiting_response.append(self.pings_awaiting_response_queue.get())
+			i = 0
+			while i < len(pings_awaiting_response):
+				if pings_awaiting_response[i][1] == recieved_ping:
+					del pings_awaiting_response[i]
+					break
+			for ping in pings_awaiting_response:
+				if int(time.time() - ping[0]) > self.config["ping_timeout"] * 2:
+					# We should log something here
+					self.establish_socket()
+					pings_awaiting_response = []
 
 	def register(self, module, trigger, trigger_method = False, server_request = False):
 		
@@ -47,13 +65,16 @@ class Client():
 
 		#logging.info('Started thread with PID: %s', h.get_ident());
 
-
 	def __init__(self):
 		logging.info('Started Client();');
-
+		self.config = configparser.ConfigParser()
+		self.config.read("/etc/manager-client/config.ini")
+		self.config = self.config["Global"]
 		self.global_event_queue = queue.Queue();
 		self.listeners = []
 		self.listener_queues = []
+		self.pings_awaiting_response_queue = queue.Queue()
+		self.recieved_pings = queue.Queue()
 		
 		sys.path.append("client/modules");
 		self.socket = None;
@@ -105,3 +126,7 @@ class Client():
 			message_object["trigger"] = was_trigger
 		#self.socket.write(json.dumps(message_object));
 		print(json.dumps(message_object), file=sys.stderr)
+	def establish_socket(self):
+		self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		server = port = 0 # TODO
+		self.socket.connect(server, port)

@@ -14,17 +14,17 @@ with open(path.join(base, 'README.md'), encoding='utf-8') as f:
 
 
 class CleanCommand(Command):
-    """Custom clean command to tidy up the project root."""
-    user_options = [];
+	"""Custom clean command to tidy up the project root."""
+	user_options = [];
 
-    def initialize_options(self):
-        pass
+	def initialize_options(self):
+		pass
 
-    def finalize_options(self):
-        pass
+	def finalize_options(self):
+		pass
 
-    def run(self):
-        os.system('rm -vrf ./build ./dist ./*.pyc ./*.tgz ./*.egg-info');
+	def run(self):
+		os.system('rm -vrf ./build ./dist ./*.pyc ./*.tgz ./*.egg-info');
 
 setup(
 	name	= 'manager-client',
@@ -68,7 +68,8 @@ setup(
 		'console_scripts': [
 			'manager-client=client:main',
 		],
-	}, cmdclass={
-        'clean': CleanCommand,
-    }
+	},
+	cmdclass= {
+		'clean': CleanCommand,
+	}
 );
