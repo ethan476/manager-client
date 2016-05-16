@@ -1,6 +1,6 @@
 import sys, os, time, logging, atexit;
 
-from signal import SIGTERM;
+from signal import SIGTERM, SIGKILL;
 
 class Daemon():
 	def __init__(self, runnable, pidfile = '/tmp/pidfile', stdin = '/dev/null', stdout = '/tmp/stderr', stderr = '/tmp/stderr'):
@@ -90,8 +90,12 @@ class Daemon():
 
 		if pid:
 			try:
+				x = 0
 				while 1:
+					x += 1
 					os.kill(pid, SIGTERM);
+					if x == 10:
+						os.kill(pid, SIGKILL);
 					time.sleep(0.1);
 			except OSError as err:
 				err = str(err);

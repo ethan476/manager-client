@@ -1,8 +1,9 @@
-import logging, time, sys, glob, threading, queue, os, time, base64, atexit, json, configparser
+import logging, time, sys, glob, threading, queue, os, time, base64, atexit, json, configparser, socket
 
 from .triggers import Triggers;
 
-class Client():
+
+class InternalClient():
 	def register(self, module, trigger, trigger_method = False, server_request = False):
 		if not trigger_method:
 			trigger_method = module.trigger_called;
@@ -36,6 +37,7 @@ class Client():
 			time.sleep(self.config["ping_timeout"])
 			payload = base64.b64encode(os.urandom(12)).decode("utf-8")
 			timestamp = int(time.time())
+			# TODO
 			self.socket.write({
 				"message_type": 0,
 				"payload": payload,
@@ -51,7 +53,7 @@ class Client():
 				recieved_ping = self.recieved_pings.get()
 			if not self.pings_awaiting_response_queue.empty():
 				pings_awaiting_response.append(self.pings_awaiting_response_queue.get())
-			for ping in pings_awaiting_response
+			for ping in pings_awaiting_response:
 				if ping[1] == recieved_ping:
 					pings_awaiting_response.remove(ping)
 					break
@@ -62,7 +64,8 @@ class Client():
 					pings_awaiting_response = []
 			time.sleep(self.config["ping_timeout"] / 5)
 
-	def __init__(self):
+	def __init__(self, socket):
+		self.socket = socket
 		logging.info('Started Client();');
 		# Open config file
 		self.config = configparser.ConfigParser()
@@ -74,9 +77,6 @@ class Client():
 		self.listener_queues = []
 		self.pings_awaiting_response_queue = queue.Queue()
 		self.recieved_pings = queue.Queue()
-		# Connect to the server
-		self.establish_socket()
-		# Begin loading modules
 		sys.path.append("client/modules");
 		old_files = [f[len("client/modules") + 1:] for f in glob.glob("client/modules/*")];
 		files = []
@@ -103,10 +103,10 @@ class Client():
 			for thread in module.listeners: # Also start all of their listeners
 				h = threading.Thread(target = thread, args = (module, lambda x, y: self.event(x,y,True),)); # We used to give the listeners module, thread but then they would be able to send server events
 				h.start();
-
-		time.sleep(1);
-		self.event("temp", 'This is a test', False);
-
+		return
+		time.sleep(.5);
+		self.event("temp", None, False);
+		return
 		while True:
 			time.sleep(10);
 
@@ -114,7 +114,7 @@ class Client():
 		message_object = {
 			"module": module.provides,
 			"version": module.version,
-			"mesage_type": 3,
+			"message_type": 3,
 			"payload": data,
 			"auth_token": "",
 			"timestamp": int(time.time())
@@ -122,10 +122,38 @@ class Client():
 		if was_trigger:
 			message_object["message_type"] = 4
 			message_object["trigger"] = was_trigger
-		#self.socket.write(json.dumps(message_object));
-		print(json.dumps(message_object), file=sys.stderr)
-	def establish_socket(self):
-		self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		server, port = self.config["server"], self.config["port"]
-		self.socket.connect(server, port)
-		# todo - some kind of authentication
+		self.socket.sendLine(json.dumps(message_object).encode("utf-8"));
+		print("SEND: " + str(json.dumps(message_object)), file=sys.stderr)
+	def handle_line(self, unparsed_line):
+		print("RECV: " + unparsed_line.decode("utf-8"), file=sys.stderr)
+		line = json.loads(unparsed_line.decode("utf-8"))
+		if line["message_type"] == 2: # TODO update to use enum
+			self.event(line["module"], line["payload"], False)
+
+
+from twisted.protocols import basic
+from twisted.internet import protocol, reactor
+from twisted.internet.protocol import ClientFactory
+from twisted.application import service, internet
+
+class ManagerProtocol(basic.LineOnlyReceiver):
+	def connectionMade(self):
+		self.client = InternalClient(self)
+	def lineReceived(self, line):
+		self.client.handle_line(line)
+
+class ManagerProtocolFactory(ClientFactory):
+	def buildProtocol(self, addr):
+		print("Connection established")
+		return ManagerProtocol()
+	def startedConnecting(self, connector):
+		pass
+	def clientConnectionLost(self, reason, reason2): # ?
+		pass
+	def clientConnectionFailed(self, connector, reason):
+		print('Connection failed. Reason:', reason)
+
+class Client():
+	def __init__(self):
+		reactor.connectTCP("127.0.0.1", 5505, ManagerProtocolFactory())
+		reactor.run()
