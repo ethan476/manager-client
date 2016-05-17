@@ -18,7 +18,7 @@ class module():
 		lines = subprocess.check_output(["df"]).decode("utf-8").split("\n")
 		for line in lines:
 			if line[-1] == "/":
-				return [int(line.split()[2])/1024.0/1024, int(line.split()[1])/1024.0/1024]
+				return [int(x)/1024.0/1024 for x in line.split()[1:3]]
 
 	def server_request(self, server_request = None):
 		return self.get_value();
