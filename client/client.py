@@ -26,7 +26,8 @@ class InternalClient():
 			if server_request and temp[0] == module.provides and not temp[2]:
 				p.put([module, False, module.server_request(temp[1])]);
 			elif temp == [module.provides, trigger, True]:
-				p.put([module, trigger, trigger_done(trigger)]);
+				#p.put([module, trigger, trigger_done(trigger)]);
+				trigger_done(temp[1], lambda data: p.put([module, trigger, data]))
 
 	def global_queue_listener_function(self, p):
 		while True:

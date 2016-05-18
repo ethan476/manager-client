@@ -19,8 +19,8 @@ class module():
 
 	listeners = [overheat_checker];
 
-	def trigger_10_called(self):
-		return ["OVERHEAT WARNING", self.get_value()]
+	def trigger_10_called(self, send_request):
+		send_request(["OVERHEAT WARNING", self.get_value()])
 
 	def __init__(self, register, triggers):
 		register(self, custom_triggers.OVERHEAT, self.trigger_10_called);
